@@ -1,9 +1,9 @@
 import random
 import string
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
-from symphozeon_backend.symphozeon_backend import settings
 from django.core.exceptions import PermissionDenied
 # Create your models here.
 
@@ -18,7 +18,6 @@ class User(AbstractUser):
     preferred_genres = models.ManyToManyField('Genre', related_name='users', blank=True)
     history_of_joined_rooms = models.ManyToManyField('Room', related_name='joined_users', blank=True)
     liked_rooms = models.ManyToManyField('Room', related_name='liked_by_users', blank=True)
-    created_rooms = models.ManyToManyField('Room', related_name='creators', blank=True)
 
 
 class Genre(models.Model):
