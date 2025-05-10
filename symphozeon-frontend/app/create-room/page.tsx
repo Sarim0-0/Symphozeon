@@ -2,27 +2,63 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { Music, Copy, Check, ChevronDown, Globe, Lock, ArrowLeft, Disc3, Sparkles, Share2, Users } from "lucide-react"
+import { ArrowLeft, Copy, Check, ChevronDown, Globe, Lock, Disc3, Sparkles, Share2, Users, Search, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import ThemeToggle from "@/components/theme-toggle"
+import Navbar from "@/components/dashboard/navbar"
 
+// Comprehensive list of music genres
 const musicGenres = [
-  { id: "rock", name: "Rock", icon: "🎸", color: "from-red-600 to-red-700" },
-  { id: "jazz", name: "Jazz", icon: "🎷", color: "from-blue-600 to-blue-700" },
-  { id: "classical", name: "Classical", icon: "🎻", color: "from-green-600 to-green-700" },
-  { id: "electronic", name: "Electronic", icon: "🎧", color: "from-purple-600 to-purple-700" },
-  { id: "hiphop", name: "Hip Hop", icon: "🎤", color: "from-yellow-600 to-yellow-700" },
-  { id: "rnb", name: "R&B", icon: "🎵", color: "from-pink-600 to-pink-700" },
-  { id: "pop", name: "Pop", icon: "🎪", color: "from-cyan-600 to-cyan-700" },
-  { id: "indie", name: "Indie", icon: "🎹", color: "from-amber-600 to-amber-700" },
-]
+  { id: "alternative", name: "Alternative" },
+  { id: "ambient", name: "Ambient" },
+  { id: "blues", name: "Blues" },
+  { id: "classical", name: "Classical" },
+  { id: "country", name: "Country" },
+  { id: "dance", name: "Dance" },
+  { id: "disco", name: "Disco" },
+  { id: "drum-and-bass", name: "Drum and Bass" },
+  { id: "dubstep", name: "Dubstep" },
+  { id: "edm", name: "EDM" },
+  { id: "electronic", name: "Electronic" },
+  { id: "folk", name: "Folk" },
+  { id: "funk", name: "Funk" },
+  { id: "gospel", name: "Gospel" },
+  { id: "grime", name: "Grime" },
+  { id: "grunge", name: "Grunge" },
+  { id: "hard-rock", name: "Hard Rock" },
+  { id: "heavy-metal", name: "Heavy Metal" },
+  { id: "hip-hop", name: "Hip Hop" },
+  { id: "house", name: "House" },
+  { id: "indie", name: "Indie" },
+  { id: "industrial", name: "Industrial" },
+  { id: "jazz", name: "Jazz" },
+  { id: "k-pop", name: "K-Pop" },
+  { id: "latin", name: "Latin" },
+  { id: "lofi", name: "Lo-Fi" },
+  { id: "metal", name: "Metal" },
+  { id: "new-age", name: "New Age" },
+  { id: "opera", name: "Opera" },
+  { id: "pop", name: "Pop" },
+  { id: "punk", name: "Punk" },
+  { id: "r-and-b", name: "R&B" },
+  { id: "rap", name: "Rap" },
+  { id: "reggae", name: "Reggae" },
+  { id: "reggaeton", name: "Reggaeton" },
+  { id: "rock", name: "Rock" },
+  { id: "ska", name: "Ska" },
+  { id: "soul", name: "Soul" },
+  { id: "soundtrack", name: "Soundtrack" },
+  { id: "swing", name: "Swing" },
+  { id: "techno", name: "Techno" },
+  { id: "trance", name: "Trance" },
+  { id: "trap", name: "Trap" },
+  { id: "world", name: "World" }
+].sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
 
 export default function CreateRoom() {
   const router = useRouter()
   const [theme, setTheme] = useState<"dark" | "light">("dark")
-  const [selectedGenre, setSelectedGenre] = useState<string | null>(null)
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([])
   const [isPublic, setIsPublic] = useState(true)
   const [roomName, setRoomName] = useState("")
   const [generatedLink, setGeneratedLink] = useState("")
@@ -31,8 +67,15 @@ export default function CreateRoom() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isLinkGenerated, setIsLinkGenerated] = useState(false)
   const [animateSuccess, setAnimateSuccess] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
   const linkInputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Filtered genres based on search query
+  const filteredGenres = musicGenres.filter(genre => 
+    genre.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Load theme from localStorage on initial render
   useEffect(() => {
@@ -61,58 +104,64 @@ export default function CreateRoom() {
     }
   }, [])
 
+  // Focus search input when dropdown opens
+  useEffect(() => {
+    if (isGenreDropdownOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isGenreDropdownOpen]);
+
+  const toggleGenreSelection = (genreId: string) => {
+  setSelectedGenres(prev => {
+    const updated = prev.includes(genreId)
+      ? prev.filter(id => id !== genreId)
+      : [...prev, genreId];
+    
+    // Clear the search query when a genre is added or removed
+    setSearchQuery("");
+    return updated;
+  });
+};
+
+
+  const removeGenre = (genreId: string) => {
+    setSelectedGenres(prev => prev.filter(id => id !== genreId));
+  };
+
   const generateRoomLink = () => {
-    if (!selectedGenre || !roomName.trim()) {
+    if (selectedGenres.length === 0 || !roomName.trim()) {
       // Show validation error
-      return
+      return;
     }
 
-    setIsGenerating(true)
+    setIsGenerating(true);
 
     // Simulate API call
     setTimeout(() => {
-      const randomString = Math.random().toString(36).substring(2, 10)
-      const link = `https://symphozeon.com/room/${randomString}`
-      setGeneratedLink(link)
-      setIsGenerating(false)
-      setIsLinkGenerated(true)
-      setAnimateSuccess(true)
+      const randomString = Math.random().toString(36).substring(2, 10);
+      const link = `https://symphozeon.com/room/${randomString}`;
+      setGeneratedLink(link);
+      setIsGenerating(false);
+      setIsLinkGenerated(true);
+      setAnimateSuccess(true);
 
       setTimeout(() => {
-        setAnimateSuccess(false)
-      }, 2000)
-    }, 1500)
-  }
+        setAnimateSuccess(false);
+      }, 2000);
+    }, 1500);
+  };
 
   const copyToClipboard = () => {
     if (linkInputRef.current) {
-      linkInputRef.current.select()
-      document.execCommand("copy")
-      setCopied(true)
+      linkInputRef.current.select();
+      document.execCommand("copy");
+      setCopied(true);
 
       setTimeout(() => {
-        setCopied(false)
-      }, 2000)
+        setCopied(false);
+      }, 2000);
     }
-  }
-
-  const getSelectedGenreColor = () => {
-    if (!selectedGenre) return "from-zinc-600 to-zinc-700"
-    const genre = musicGenres.find((g) => g.id === selectedGenre)
-    return genre ? genre.color : "from-zinc-600 to-zinc-700"
-  }
-
-  const getSelectedGenreIcon = () => {
-    if (!selectedGenre) return "🎵"
-    const genre = musicGenres.find((g) => g.id === selectedGenre)
-    return genre ? genre.icon : "🎵"
-  }
-
-  const getSelectedGenreName = () => {
-    if (!selectedGenre) return "Select Genre"
-    const genre = musicGenres.find((g) => g.id === selectedGenre)
-    return genre ? genre.name : "Select Genre"
-  }
+  };
 
   return (
     <div
@@ -123,7 +172,7 @@ export default function CreateRoom() {
       }`}
     >
       {/* Background ambient elements */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Top meander pattern */}
 
         {/* Bottom meander pattern */}
@@ -170,46 +219,12 @@ export default function CreateRoom() {
         </div>
       </div>
 
-      {/* Header */}
-      <header
-        className={`w-full py-4 px-6 flex items-center justify-between ${
-          theme === "dark" ? "bg-zinc-900/50" : "bg-white/50"
-        } backdrop-blur-md border-b ${theme === "dark" ? "border-zinc-800" : "border-zinc-200"}`}
-      >
-        <div className="flex items-center">
-          <Link href="/" className="flex items-center group">
-            <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 mr-3 ${
-                theme === "dark"
-                  ? "bg-zinc-800 text-amber-500 border border-amber-600/50"
-                  : "bg-white text-amber-600 border border-amber-500 shadow-md shadow-amber-200"
-              }`}
-            >
-              <Music size={20} />
-            </div>
-            <h1
-              className={`font-serif text-2xl font-bold tracking-wide hidden sm:block ${
-                theme === "dark" ? "title-effect-dark" : "title-effect"
-              }`}
-            >
-              Symphozeon
-            </h1>
-          </Link>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`${theme === "dark" ? "text-zinc-400 hover:text-white" : "text-zinc-600 hover:text-zinc-900"}`}
-            onClick={() => router.push("/dashboard")}
-          >
-            <ArrowLeft size={16} className="mr-2" />
-            Back to Dashboard
-          </Button>
-          <ThemeToggle currentTheme={theme} setTheme={setTheme} />
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar 
+        theme={theme} 
+        setTheme={setTheme} 
+        showUserProfile={true}
+      />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Page title */}
@@ -296,8 +311,43 @@ export default function CreateRoom() {
                 htmlFor="genre"
                 className={`block text-sm font-medium ${theme === "dark" ? "text-zinc-300" : "text-zinc-700"}`}
               >
-                Music Genre
+                Music Genres
               </label>
+              
+              {/* Selected genres display */}
+              {selectedGenres.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {selectedGenres.map(genreId => {
+                    const genre = musicGenres.find(g => g.id === genreId);
+                    return (
+                      <motion.div
+                        key={genreId}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
+                          theme === "dark"
+                            ? "bg-zinc-800 text-amber-400 border border-amber-600/30"
+                            : "bg-amber-50 text-amber-800 border border-amber-300"
+                        }`}
+                      >
+                        {genre?.name}
+                        <button
+                          onClick={() => removeGenre(genreId)}
+                          className={`ml-2 rounded-full p-0.5 transition-colors ${
+                            theme === "dark"
+                              ? "hover:bg-zinc-700 text-zinc-400 hover:text-amber-400"
+                              : "hover:bg-amber-100 text-zinc-500 hover:text-amber-700"
+                          }`}
+                        >
+                          <X size={14} />
+                        </button>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+              
               <div className="relative" ref={dropdownRef}>
                 <motion.button
                   whileHover={{ scale: 1.01 }}
@@ -310,12 +360,15 @@ export default function CreateRoom() {
                   } rounded-md shadow-sm focus:outline-none focus:ring-2 ${
                     theme === "dark" ? "focus:ring-amber-500" : "focus:ring-amber-600"
                   } focus:border-transparent transition-all duration-300 ${
-                    !selectedGenre && isLinkGenerated ? "ring-2 ring-red-500" : ""
+                    selectedGenres.length === 0 && isLinkGenerated ? "ring-2 ring-red-500" : ""
                   }`}
                 >
                   <div className="flex items-center">
-                    <span className="mr-2 text-xl">{getSelectedGenreIcon()}</span>
-                    <span>{getSelectedGenreName()}</span>
+                    <span>
+                      {selectedGenres.length === 0 
+                        ? "Select Genres" 
+                        : `${selectedGenres.length} genre${selectedGenres.length > 1 ? 's' : ''} selected`}
+                    </span>
                   </div>
                   <ChevronDown
                     size={18}
@@ -334,41 +387,76 @@ export default function CreateRoom() {
                         theme === "dark" ? "bg-zinc-800 border border-zinc-700" : "bg-white border border-zinc-200"
                       }`}
                     >
-                      <div className="py-1 max-h-60 overflow-auto">
-                        {musicGenres.map((genre) => (
-                          <motion.button
-                            key={genre.id}
-                            whileHover={{ backgroundColor: theme === "dark" ? "#27272a" : "#f4f4f5" }}
-                            onClick={() => {
-                              setSelectedGenre(genre.id)
-                              setIsGenreDropdownOpen(false)
-                            }}
-                            className={`w-full text-left px-4 py-2 flex items-center ${
-                              selectedGenre === genre.id
-                                ? theme === "dark"
-                                  ? "bg-zinc-700 text-amber-500"
-                                  : "bg-zinc-100 text-amber-600"
-                                : theme === "dark"
-                                  ? "text-white"
-                                  : "text-zinc-900"
-                            }`}
-                          >
-                            <span className="mr-2 text-xl">{genre.icon}</span>
-                            <span>{genre.name}</span>
-                          </motion.button>
-                        ))}
+                      {/* Search input */}
+                      <div className={`p-2 border-b ${theme === "dark" ? "border-zinc-700" : "border-zinc-200"}`}>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Search size={16} className={theme === "dark" ? "text-zinc-500" : "text-zinc-400"} />
+                          </div>
+                          <input
+                            ref={searchInputRef}
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search genres..."
+                            className={`block w-full pl-10 pr-3 py-2 border ${
+                              theme === "dark"
+                                ? "bg-zinc-700 border-zinc-600 text-white placeholder-zinc-400"
+                                : "bg-white border-zinc-300 text-zinc-900 placeholder-zinc-500"
+                            } rounded-md focus:outline-none focus:ring-2 ${
+                              theme === "dark" ? "focus:ring-amber-500" : "focus:ring-amber-600"
+                            } focus:border-transparent transition-all duration-200`}
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Genres list */}
+                      <div 
+                        className={`py-1 max-h-60 overflow-y-auto ${
+                          theme === "dark" 
+                            ? "scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-zinc-800 hover:scrollbar-thumb-amber-600" 
+                            : "scrollbar-thin scrollbar-thumb-zinc-300 scrollbar-track-zinc-100 hover:scrollbar-thumb-amber-400"
+                        }`}
+                      >
+                        {filteredGenres.length > 0 ? (
+                          filteredGenres.map((genre) => (
+                            <motion.button
+                              key={genre.id}
+                              whileHover={{ backgroundColor: theme === "dark" ? "#27272a" : "#f4f4f5" }}
+                              onClick={() => toggleGenreSelection(genre.id)}
+                              className={`w-full text-left px-4 py-2 flex items-center justify-between ${
+                                selectedGenres.includes(genre.id)
+                                  ? theme === "dark"
+                                    ? "bg-zinc-700 text-amber-500"
+                                    : "bg-amber-50 text-amber-800"
+                                  : theme === "dark"
+                                    ? "text-white"
+                                    : "text-zinc-900"
+                              }`}
+                            >
+                              <span>{genre.name}</span>
+                              {selectedGenres.includes(genre.id) && (
+                                <Check size={16} className={theme === "dark" ? "text-amber-500" : "text-amber-600"} />
+                              )}
+                            </motion.button>
+                          ))
+                        ) : (
+                          <div className={`px-4 py-3 text-center ${theme === "dark" ? "text-zinc-400" : "text-zinc-500"}`}>
+                            No genres found
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-              {!selectedGenre && isLinkGenerated && (
+              {selectedGenres.length === 0 && isLinkGenerated && (
                 <motion.p
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-sm text-red-500 mt-1"
                 >
-                  Please select a genre
+                  Please select at least one genre
                 </motion.p>
               )}
             </div>
@@ -477,7 +565,7 @@ export default function CreateRoom() {
                         id="roomLink"
                         value={generatedLink}
                         readOnly
-                        className={`block w-full p-3 pr-12 py-3 border ${
+                        className={`block w-full pr-12 py-3 border ${
                           theme === "dark"
                             ? "bg-zinc-800/50 border-zinc-700 text-white"
                             : "bg-white border-zinc-300 text-zinc-900"

@@ -14,7 +14,8 @@ def generate_unique_room_code(length=8):
             return code
 
 class User(AbstractUser):
-    profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)  
+    display_name = models.CharField(max_length=255, blank=True)
     preferred_genres = models.ManyToManyField('Genre', related_name='users', blank=True)
     history_of_joined_rooms = models.ManyToManyField('Room', related_name='joined_users', blank=True)
     liked_rooms = models.ManyToManyField('Room', related_name='liked_by_users', blank=True)

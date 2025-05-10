@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { Music, ArrowLeft, LogIn, Check, Users, Disc3 } from "lucide-react"
-import ThemeToggle from "@/components/theme-toggle"
+import { ArrowLeft, LogIn, Check, Users, Disc3, Music } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import Navbar from "@/components/dashboard/navbar"
 
 export default function JoinRoomPage() {
   const router = useRouter()
@@ -74,6 +74,7 @@ export default function JoinRoomPage() {
     }, 1000)
   }
 
+
   return (
     <div
       className={`min-h-screen w-full transition-colors duration-500 ${
@@ -83,10 +84,7 @@ export default function JoinRoomPage() {
       }`}
     >
       {/* Background ambient elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Top meander pattern */}
-
-        {/* Bottom meander pattern */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
 
         {/* Ambient glow */}
         <motion.div
@@ -130,50 +128,12 @@ export default function JoinRoomPage() {
         </div>
       </div>
 
-      {/* Header */}
-      <header
-        className={`w-full py-4 px-6 flex items-center justify-between ${
-          theme === "dark" ? "bg-zinc-900/50" : "bg-white/50"
-        } backdrop-blur-md border-b ${theme === "dark" ? "border-zinc-800" : "border-zinc-200"}`}
-      >
-        <div className="flex items-center">
-          <Link href="/" className="flex items-center group">
-            <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 mr-3 ${
-                theme === "dark"
-                  ? "bg-zinc-800 text-amber-500 border border-amber-600/50"
-                  : "bg-white text-amber-600 border border-amber-500 shadow-md shadow-amber-200"
-              }`}
-            >
-              <Music size={20} />
-            </div>
-            <h1
-              className={`font-serif text-2xl font-bold tracking-wide hidden sm:block ${
-                theme === "dark" ? "title-effect-dark" : "title-effect"
-              }`}
-            >
-              Symphozeon
-            </h1>
-          </Link>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => router.push("/dashboard")}
-            className={`flex items-center px-3 py-2 rounded-md transition-all duration-300 ${
-              theme === "dark"
-                ? "text-zinc-400 hover:text-white hover:bg-zinc-800"
-                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
-            }`}
-          >
-            <ArrowLeft size={16} className="mr-2" />
-            <span className="text-sm">Back to Dashboard</span>
-          </motion.button>
-          <ThemeToggle currentTheme={theme} setTheme={setTheme} />
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar 
+        theme={theme} 
+        setTheme={setTheme} 
+        showUserProfile={true}
+      />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Page title */}
@@ -302,65 +262,6 @@ export default function JoinRoomPage() {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-        </motion.div>
-
-        {/* Recent rooms section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="mt-12"
-        >
-          <h2 className={`text-2xl font-serif font-bold mb-6 ${theme === "dark" ? "text-white" : "text-zinc-900"}`}>
-            <span className="decorative-underline">Recently Joined Rooms</span>
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {recentRooms.map((room, index) => (
-              <motion.div
-                key={room.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${
-                  theme === "dark"
-                    ? "bg-zinc-900/70 border border-zinc-800 hover:border-amber-600/50 hover:shadow-[0_0_15px_rgba(217,119,6,0.15)]"
-                    : "bg-white/70 border border-zinc-200 hover:border-amber-500/50 hover:shadow-[0_0_15px_rgba(217,119,6,0.1)]"
-                }`}
-                onClick={() => handleQuickJoin(room.id)}
-              >
-                <div className="flex items-center mb-3">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
-                      theme === "dark" ? "bg-zinc-800" : "bg-zinc-100"
-                    }`}
-                  >
-                    <Music size={20} className={theme === "dark" ? "text-amber-500" : "text-amber-600"} />
-                  </div>
-                  <div>
-                    <h3 className={`font-medium ${theme === "dark" ? "text-white" : "text-zinc-900"}`}>{room.name}</h3>
-                    <p className={`text-sm ${theme === "dark" ? "text-zinc-400" : "text-zinc-600"}`}>
-                      {room.genre} • Hosted by {room.host}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex justify-end">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`text-sm px-3 py-1 rounded-md ${
-                      theme === "dark" ? "text-amber-500 hover:bg-zinc-800" : "text-amber-600 hover:bg-zinc-100"
-                    }`}
-                  >
-                    <Users size={14} className="inline mr-1" />
-                    Quick Join
-                  </motion.button>
-                </div>
-              </motion.div>
-            ))}
           </div>
         </motion.div>
 

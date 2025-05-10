@@ -5,7 +5,7 @@ from .models import User, Genre, Room, Role, Permission, RoomMembership, VibeVot
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile_picture', 
+        fields = ['id', 'email', 'password', 'username', 'first_name', 'last_name', 'profile_picture', 'display_name', 
                   'preferred_genres', 'history_of_joined_rooms', 'liked_rooms']
 
 #Genres

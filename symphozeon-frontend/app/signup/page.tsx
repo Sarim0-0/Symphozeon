@@ -2,36 +2,48 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { Music, ArrowRight, Eye, EyeOff, Loader2, Check } from "lucide-react"
+import { Music, ArrowRight, Eye, EyeOff, Loader2, Check, Search, X, User, Camera } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import ThemeToggle from "@/components/theme-toggle"
 
+// Add custom scrollbar styles
+import "tailwindcss/tailwind.css"
+
 export default function SignupPage() {
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [theme, setTheme] = useState<"dark" | "light">("dark")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
+  const [genreSearch, setGenreSearch] = useState("")
+  const [profileImage, setProfileImage] = useState<string | null>(null)
   const [formState, setFormState] = useState({
-    username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    firstName: "",
+    lastName: "",
+    username: "",
+    displayName: "",
     agreeTerms: false,
     musicInterests: [] as string[],
   })
   const [formErrors, setFormErrors] = useState({
-    username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    firstName: "",
+    lastName: "",
+    username: "",
+    displayName: "",
     agreeTerms: "",
   })
 
@@ -59,24 +71,87 @@ export default function SignupPage() {
 
   const passwordStrengthScore = Object.values(passwordStrength).filter(Boolean).length
 
-  // Music genre options
+  // Comprehensive music genre list
   const musicGenres = [
+    // Popular genres
     "Rock",
     "Pop",
     "Hip Hop",
-    "Jazz",
-    "Classical",
-    "Electronic",
     "R&B",
     "Country",
-    "Metal",
-    "Folk",
-    "Indie",
+    "Jazz",
     "Blues",
+    "Classical",
+    "Electronic",
+    "Metal",
+    // Electronic subgenres
+    "House",
+    "Techno",
+    "Dubstep",
+    "Drum & Bass",
+    "Trance",
+    "Ambient",
+    "EDM",
+    "Lo-fi",
+    "Synthwave",
+    "Electro",
+    // Rock subgenres
+    "Alternative Rock",
+    "Indie Rock",
+    "Punk Rock",
+    "Hard Rock",
+    "Classic Rock",
+    "Progressive Rock",
+    "Psychedelic Rock",
+    "Folk Rock",
+    "Garage Rock",
+    "Grunge",
+    // Hip Hop subgenres
+    "Trap",
+    "Drill",
+    "Boom Bap",
+    "Conscious Hip Hop",
+    "Gangsta Rap",
+    "Mumble Rap",
+    "Old School Hip Hop",
+    "Alternative Hip Hop",
+    "East Coast Hip Hop",
+    "West Coast Hip Hop",
+    // Other genres
+    "Folk",
     "Reggae",
-    "Punk",
     "Soul",
-  ]
+    "Funk",
+    "Disco",
+    "Gospel",
+    "World Music",
+    "New Age",
+    "Soundtrack",
+    "Instrumental",
+    "Latin",
+    "K-Pop",
+    "J-Pop",
+    "Afrobeat",
+    "Reggaeton",
+    "Salsa",
+    "Bossa Nova",
+    "Opera",
+    "Bluegrass",
+    "Celtic",
+    "Flamenco",
+    "Ska",
+    "Punk",
+    "Emo",
+    "Goth",
+    "Industrial",
+    "Post-Rock",
+    "Math Rock",
+    "Shoegaze",
+    "Dream Pop",
+  ].sort()
+
+  // Filter genres based on search
+  const filteredGenres = musicGenres.filter((genre) => genre.toLowerCase().includes(genreSearch.toLowerCase()))
 
   // Simulated signup function
   const handleSignup = async (e: React.FormEvent) => {
@@ -85,11 +160,6 @@ export default function SignupPage() {
     if (currentStep === 1) {
       // Basic validation for step 1
       const errors = {
-        username: !formState.username
-          ? "Username is required"
-          : formState.username.length < 3
-            ? "Username must be at least 3 characters"
-            : "",
         email: !formState.email ? "Email is required" : !/\S+@\S+\.\S+/.test(formState.email) ? "Email is invalid" : "",
         password: !formState.password
           ? "Password is required"
@@ -102,6 +172,10 @@ export default function SignupPage() {
             ? "Passwords do not match"
             : "",
         agreeTerms: !formState.agreeTerms ? "You must agree to the terms" : "",
+        firstName: "",
+        lastName: "",
+        username: "",
+        displayName: "",
       }
 
       setFormErrors(errors)
@@ -115,7 +189,41 @@ export default function SignupPage() {
       return
     }
 
-    // Step 2 submission
+    if (currentStep === 2) {
+      // Validation for step 2
+      const errors = {
+        firstName: !formState.firstName ? "First name is required" : "",
+        lastName: !formState.lastName ? "Last name is required" : "",
+        username: !formState.username
+          ? "Username is required"
+          : formState.username.length < 3
+            ? "Username must be at least 3 characters"
+            : "",
+        email: formErrors.email,
+        password: formErrors.password,
+        confirmPassword: formErrors.confirmPassword,
+        agreeTerms: formErrors.agreeTerms,
+        displayName: "",
+      }
+
+      setFormErrors(errors)
+
+      if (errors.firstName || errors.lastName || errors.username) {
+        return
+      }
+
+      // Move to step 3
+      setCurrentStep(3)
+      return
+    }
+
+    if (currentStep === 3) {
+      // No validation needed for music interests, just move to step 4
+      setCurrentStep(4)
+      return
+    }
+
+    // Step 4 submission
     setIsLoading(true)
 
     // Simulate API call
@@ -124,6 +232,10 @@ export default function SignupPage() {
 
       // Store username in localStorage for demo purposes
       localStorage.setItem("userName", formState.username)
+      localStorage.setItem("displayName", formState.displayName || formState.username)
+      if (profileImage) {
+        localStorage.setItem("profileImage", profileImage)
+      }
 
       // Redirect to login page after successful signup
       router.push("/login")
@@ -154,6 +266,53 @@ export default function SignupPage() {
       }
     })
   }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setProfileImage(e.target.result as string)
+        }
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click()
+  }
+
+  const removeProfileImage = () => {
+    setProfileImage(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
+  const skipProfileSetup = () => {
+    // Set display name to username if not provided
+    if (!formState.displayName) {
+      setFormState((prev) => ({ ...prev, displayName: prev.username }))
+    }
+    handleSignup(new Event("submit") as unknown as React.FormEvent)
+  }
+
+  // Function to format selected genres for display
+  const formatSelectedGenres = () => {
+    if (formState.musicInterests.length === 0) {
+      return "No genres selected"
+    }
+
+    return formState.musicInterests.join(", ")
+  }
+
+  // Custom scrollbar styles
+  const scrollbarStyles =
+    theme === "dark"
+      ? "scrollbar-thin scrollbar-thumb-amber-600/40 scrollbar-track-zinc-800/40 hover:scrollbar-thumb-amber-500/60"
+      : "scrollbar-thin scrollbar-thumb-amber-500/30 scrollbar-track-zinc-200/50 hover:scrollbar-thumb-amber-500/50"
 
   return (
     <div
@@ -219,7 +378,7 @@ export default function SignupPage() {
       <div className="container relative z-10 px-4 mx-auto py-8">
         <div className="max-w-md mx-auto">
           {/* Logo and title */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <Link href="/" className="inline-block group">
               <div className="flex items-center justify-center mb-4">
                 <div
@@ -245,13 +404,6 @@ export default function SignupPage() {
             </Link>
 
             {/* Greek-inspired decorative element */}
-            <motion.div
-              className="w-32 h-3 mx-auto mb-6 relative overflow-hidden"
-              initial={{ width: 0 }}
-              animate={{ width: "8rem" }}
-              transition={{ duration: 1, delay: 0.3 }}
-            >
-            </motion.div>
           </div>
 
           {/* Step indicator */}
@@ -259,13 +411,23 @@ export default function SignupPage() {
             <div className="flex items-center">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  theme === "dark" ? "bg-amber-600 text-black" : "bg-amber-600 text-white"
+                  currentStep > 1
+                    ? theme === "dark"
+                      ? "bg-amber-600 text-black"
+                      : "bg-amber-600 text-white"
+                    : currentStep === 1
+                      ? theme === "dark"
+                        ? "bg-amber-600 text-black"
+                        : "bg-amber-600 text-white"
+                      : theme === "dark"
+                        ? "bg-zinc-800 text-zinc-400"
+                        : "bg-zinc-200 text-zinc-600"
                 }`}
               >
                 {currentStep > 1 ? <Check size={16} /> : "1"}
               </div>
               <div
-                className={`w-10 h-1 ${
+                className={`w-6 h-1 ${
                   currentStep > 1
                     ? theme === "dark"
                       ? "bg-amber-600"
@@ -277,7 +439,63 @@ export default function SignupPage() {
               ></div>
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  currentStep === 2
+                  currentStep > 2
+                    ? theme === "dark"
+                      ? "bg-amber-600 text-black"
+                      : "bg-amber-600 text-white"
+                    : currentStep === 2
+                      ? theme === "dark"
+                        ? "bg-amber-600 text-black"
+                        : "bg-amber-600 text-white"
+                      : theme === "dark"
+                        ? "bg-zinc-800 text-zinc-400"
+                        : "bg-zinc-200 text-zinc-600"
+                }`}
+              >
+                {currentStep > 2 ? <Check size={16} /> : "2"}
+              </div>
+              <div
+                className={`w-6 h-1 ${
+                  currentStep > 2
+                    ? theme === "dark"
+                      ? "bg-amber-600"
+                      : "bg-amber-600"
+                    : theme === "dark"
+                      ? "bg-zinc-700"
+                      : "bg-zinc-300"
+                }`}
+              ></div>
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  currentStep > 3
+                    ? theme === "dark"
+                      ? "bg-amber-600 text-black"
+                      : "bg-amber-600 text-white"
+                    : currentStep === 3
+                      ? theme === "dark"
+                        ? "bg-amber-600 text-black"
+                        : "bg-amber-600 text-white"
+                      : theme === "dark"
+                        ? "bg-zinc-800 text-zinc-400"
+                        : "bg-zinc-200 text-zinc-600"
+                }`}
+              >
+                {currentStep > 3 ? <Check size={16} /> : "3"}
+              </div>
+              <div
+                className={`w-6 h-1 ${
+                  currentStep > 3
+                    ? theme === "dark"
+                      ? "bg-amber-600"
+                      : "bg-amber-600"
+                    : theme === "dark"
+                      ? "bg-zinc-700"
+                      : "bg-zinc-300"
+                }`}
+              ></div>
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  currentStep === 4
                     ? theme === "dark"
                       ? "bg-amber-600 text-black"
                       : "bg-amber-600 text-white"
@@ -286,7 +504,7 @@ export default function SignupPage() {
                       : "bg-zinc-200 text-zinc-600"
                 }`}
               >
-                2
+                4
               </div>
             </div>
           </div>
@@ -302,46 +520,21 @@ export default function SignupPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
+            {/* Greek pattern top */}
 
             <h2 className={`text-2xl font-serif font-bold mb-6 ${theme === "dark" ? "text-white" : "text-zinc-900"}`}>
-              {currentStep === 1 ? "Create Your Account" : "Your Musical Preferences"}
+              {currentStep === 1
+                ? "Create Your Account"
+                : currentStep === 2
+                  ? "Personal Information"
+                  : currentStep === 3
+                    ? "Your Musical Preferences"
+                    : "Complete Your Profile"}
             </h2>
 
             <form onSubmit={handleSignup} className="space-y-5">
-              {currentStep === 1 ? (
+              {currentStep === 1 && (
                 <>
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="username"
-                      className={`text-sm font-medium ${theme === "dark" ? "text-zinc-300" : "text-zinc-700"}`}
-                    >
-                      Username
-                    </Label>
-                    <Input
-                      id="username"
-                      name="username"
-                      type="text"
-                      placeholder="Choose a username"
-                      value={formState.username}
-                      onChange={handleInputChange}
-                      className={`bg-opacity-70 transition-all duration-300 ${
-                        theme === "dark"
-                          ? "bg-zinc-800 border-zinc-700 text-white focus:border-amber-500 hover:border-amber-600/70 hover:shadow-[0_0_15px_rgba(217,119,6,0.15)]"
-                          : "bg-white border-zinc-300 text-zinc-900 focus:border-amber-600 hover:border-amber-500/70 hover:shadow-[0_0_15px_rgba(217,119,6,0.1)]"
-                      } ${formErrors.username ? "border-red-500" : ""}`}
-                    />
-                    {formErrors.username && (
-                      <motion.p
-                        className="text-red-500 text-xs mt-1"
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        {formErrors.username}
-                      </motion.p>
-                    )}
-                  </div>
-
                   <div className="space-y-2">
                     <Label
                       htmlFor="email"
@@ -585,7 +778,109 @@ export default function SignupPage() {
                     </div>
                   </div>
                 </>
-              ) : (
+              )}
+
+              {currentStep === 2 && (
+                <>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="firstName"
+                      className={`text-sm font-medium ${theme === "dark" ? "text-zinc-300" : "text-zinc-700"}`}
+                    >
+                      First Name
+                    </Label>
+                    <Input
+                      id="firstName"
+                      name="firstName"
+                      type="text"
+                      placeholder="John"
+                      value={formState.firstName}
+                      onChange={handleInputChange}
+                      className={`bg-opacity-70 transition-all duration-300 ${
+                        theme === "dark"
+                          ? "bg-zinc-800 border-zinc-700 text-white focus:border-amber-500 hover:border-amber-600/70 hover:shadow-[0_0_15px_rgba(217,119,6,0.15)]"
+                          : "bg-white border-zinc-300 text-zinc-900 focus:border-amber-600 hover:border-amber-500/70 hover:shadow-[0_0_15px_rgba(217,119,6,0.1)]"
+                      } ${formErrors.firstName ? "border-red-500" : ""}`}
+                    />
+                    {formErrors.firstName && (
+                      <motion.p
+                        className="text-red-500 text-xs mt-1"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {formErrors.firstName}
+                      </motion.p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="lastName"
+                      className={`text-sm font-medium ${theme === "dark" ? "text-zinc-300" : "text-zinc-700"}`}
+                    >
+                      Last Name
+                    </Label>
+                    <Input
+                      id="lastName"
+                      name="lastName"
+                      type="text"
+                      placeholder="Doe"
+                      value={formState.lastName}
+                      onChange={handleInputChange}
+                      className={`bg-opacity-70 transition-all duration-300 ${
+                        theme === "dark"
+                          ? "bg-zinc-800 border-zinc-700 text-white focus:border-amber-500 hover:border-amber-600/70 hover:shadow-[0_0_15px_rgba(217,119,6,0.15)]"
+                          : "bg-white border-zinc-300 text-zinc-900 focus:border-amber-600 hover:border-amber-500/70 hover:shadow-[0_0_15px_rgba(217,119,6,0.1)]"
+                      } ${formErrors.lastName ? "border-red-500" : ""}`}
+                    />
+                    {formErrors.lastName && (
+                      <motion.p
+                        className="text-red-500 text-xs mt-1"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {formErrors.lastName}
+                      </motion.p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="username"
+                      className={`text-sm font-medium ${theme === "dark" ? "text-zinc-300" : "text-zinc-700"}`}
+                    >
+                      Username
+                    </Label>
+                    <Input
+                      id="username"
+                      name="username"
+                      type="text"
+                      placeholder="Choose a username"
+                      value={formState.username}
+                      onChange={handleInputChange}
+                      className={`bg-opacity-70 transition-all duration-300 ${
+                        theme === "dark"
+                          ? "bg-zinc-800 border-zinc-700 text-white focus:border-amber-500 hover:border-amber-600/70 hover:shadow-[0_0_15px_rgba(217,119,6,0.15)]"
+                          : "bg-white border-zinc-300 text-zinc-900 focus:border-amber-600 hover:border-amber-500/70 hover:shadow-[0_0_15px_rgba(217,119,6,0.1)]"
+                      } ${formErrors.username ? "border-red-500" : ""}`}
+                    />
+                    {formErrors.username && (
+                      <motion.p
+                        className="text-red-500 text-xs mt-1"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {formErrors.username}
+                      </motion.p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {currentStep === 3 && (
                 <>
                   <div className="space-y-3">
                     <Label className={`text-sm font-medium ${theme === "dark" ? "text-zinc-300" : "text-zinc-700"}`}>
@@ -594,26 +889,259 @@ export default function SignupPage() {
                     <p className={`text-xs ${theme === "dark" ? "text-zinc-400" : "text-zinc-600"}`}>
                       This helps us personalize your experience and recommend music you'll love.
                     </p>
-                    <div className="grid grid-cols-3 gap-2 mt-2">
-                      {musicGenres.map((genre) => (
-                        <motion.div
-                          key={genre}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => toggleMusicGenre(genre)}
-                          className={`px-3 py-2 rounded-md text-sm text-center cursor-pointer transition-colors duration-200 ${
-                            formState.musicInterests.includes(genre)
-                              ? theme === "dark"
-                                ? "bg-amber-600 text-black"
-                                : "bg-amber-600 text-white"
-                              : theme === "dark"
-                                ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                                : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
+
+                    {/* Search bar for genres */}
+                    <div className="relative">
+                      <Search
+                        size={18}
+                        className={`absolute left-3 top-1/2 -translate-y-1/2 ${
+                          theme === "dark" ? "text-zinc-400" : "text-zinc-500"
+                        }`}
+                      />
+                      <Input
+                        type="text"
+                        placeholder="Search genres..."
+                        value={genreSearch}
+                        onChange={(e) => setGenreSearch(e.target.value)}
+                        className={`pl-10 bg-opacity-70 transition-all duration-300 ${
+                          theme === "dark"
+                            ? "bg-zinc-800 border-zinc-700 text-white focus:border-amber-500 hover:border-amber-600/70 focus:ring-1 focus:ring-amber-500/30"
+                            : "bg-white border-zinc-300 text-zinc-900 focus:border-amber-600 hover:border-amber-500/70 focus:ring-1 focus:ring-amber-600/30"
+                        }`}
+                      />
+                      {genreSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setGenreSearch("")}
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 ${
+                            theme === "dark" ? "text-zinc-400 hover:text-zinc-200" : "text-zinc-500 hover:text-zinc-700"
                           }`}
                         >
-                          {genre}
-                        </motion.div>
-                      ))}
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Selected genres section */}
+                    <div className="space-y-2">
+                      <div className={`flex items-center ${theme === "dark" ? "text-zinc-400" : "text-zinc-600"}`}>
+                        <div
+                          className={`h-2 w-2 rounded-full mr-2 ${
+                            formState.musicInterests.length > 0
+                              ? "bg-amber-500"
+                              : theme === "dark"
+                                ? "bg-zinc-700"
+                                : "bg-zinc-300"
+                          }`}
+                        ></div>
+                        <span className="text-xs font-medium">
+                          {formState.musicInterests.length} {formState.musicInterests.length === 1 ? "genre" : "genres"}{" "}
+                          selected
+                        </span>
+                      </div>
+
+                      {formState.musicInterests.length > 0 && (
+                        <div
+                          className={`text-xs p-2 rounded-md max-h-20 overflow-y-auto ${
+                            theme === "dark"
+                              ? "bg-zinc-800/50 text-zinc-300 " + scrollbarStyles
+                              : "bg-zinc-100/70 text-zinc-700 " + scrollbarStyles
+                          }`}
+                        >
+                          {formState.musicInterests.map((genre, index) => (
+                            <span
+                              key={genre}
+                              className={`inline-flex items-center m-0.5 px-2 py-1 rounded-full text-xs ${
+                                theme === "dark"
+                                  ? "bg-amber-600/20 text-amber-400 border border-amber-600/30"
+                                  : "bg-amber-100 text-amber-800 border border-amber-200"
+                              }`}
+                            >
+                              {genre}
+                              <button
+                                type="button"
+                                onClick={() => toggleMusicGenre(genre)}
+                                className="ml-1 hover:text-red-500 transition-colors"
+                              >
+                                <X size={12} />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Genre selection grid */}
+                    <div className="mt-2">
+                      <div
+                        className={`grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-60 overflow-y-auto pr-2 ${scrollbarStyles}`}
+                      >
+                        {filteredGenres.map((genre) => (
+                          <div key={genre} className="group relative h-11 flex items-center justify-center">
+                            <motion.div
+                              whileHover={{ scale: 1.03 }}
+                              whileTap={{ scale: 0.97 }}
+                              onClick={() => toggleMusicGenre(genre)}
+                              className={`
+                                absolute inset-0 flex items-center justify-center px-3 py-2 rounded-md text-sm 
+                                font-medium cursor-pointer transition-all duration-200 z-10
+                                ${
+                                  formState.musicInterests.includes(genre)
+                                    ? theme === "dark"
+                                      ? "bg-amber-600 text-black border border-amber-500 shadow-md shadow-amber-900/20"
+                                      : "bg-amber-600 text-white border border-amber-500 shadow-md shadow-amber-500/20"
+                                    : theme === "dark"
+                                      ? "bg-zinc-800 text-zinc-300 border border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600"
+                                      : "bg-zinc-100 text-zinc-700 border border-zinc-200 hover:bg-zinc-200 hover:border-zinc-300"
+                                }
+                              `}
+                            >
+                              <span className="truncate">{genre}</span>
+                            </motion.div>
+
+                            {/* Expanded overlay for long genre names */}
+                            <div
+                              className={`
+                                absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 
+                                flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium z-20
+                                ${
+                                  formState.musicInterests.includes(genre)
+                                    ? theme === "dark"
+                                      ? "bg-amber-600 text-black border border-amber-500 shadow-lg shadow-amber-900/30"
+                                      : "bg-amber-600 text-white border border-amber-500 shadow-lg shadow-amber-500/30"
+                                    : theme === "dark"
+                                      ? "bg-zinc-800 text-zinc-300 border border-zinc-700"
+                                      : "bg-zinc-100 text-zinc-700 border border-zinc-200"
+                                }
+                              `}
+                              style={{
+                                width: "auto",
+                                minWidth: "100%",
+                                maxWidth: genre.length > 15 ? "150%" : "100%",
+                                pointerEvents: "none",
+                              }}
+                            >
+                              {genre}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {filteredGenres.length === 0 && (
+                      <div className={`text-center py-6 ${theme === "dark" ? "text-zinc-400" : "text-zinc-600"}`}>
+                        No genres found matching your search
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {currentStep === 4 && (
+                <>
+                  <div className="space-y-5">
+                    <div className="text-center">
+                      <p className={`text-sm mb-4 ${theme === "dark" ? "text-zinc-300" : "text-zinc-700"}`}>
+                        Almost done! Add a profile picture and display name to complete your profile.
+                      </p>
+                    </div>
+
+                    {/* Profile picture upload */}
+                    <div className="flex flex-col items-center space-y-4">
+                      <div
+                        className={`w-32 h-32 rounded-full relative overflow-hidden flex items-center justify-center cursor-pointer transition-all duration-300 ${
+                          theme === "dark"
+                            ? profileImage
+                              ? "border-2 border-amber-600/30"
+                              : "bg-zinc-800 border-2 border-dashed border-zinc-700 hover:border-amber-500/50"
+                            : profileImage
+                              ? "border-2 border-amber-500/30"
+                              : "bg-zinc-100 border-2 border-dashed border-zinc-300 hover:border-amber-600/50"
+                        }`}
+                        onClick={triggerFileInput}
+                      >
+                        {profileImage ? (
+                          <>
+                            <img
+                              src={profileImage || "/placeholder.svg"}
+                              alt="Profile"
+                              className="w-full h-full object-cover"
+                            />
+                            <div
+                              className={`absolute inset-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center`}
+                            >
+                              <Camera size={24} className="text-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <User size={40} className={theme === "dark" ? "text-zinc-500" : "text-zinc-400"} />
+                        )}
+                      </div>
+
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+
+                      <div className="flex space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={triggerFileInput}
+                          className={`text-sm py-1 px-3 transition-all duration-300 ${
+                            theme === "dark"
+                              ? "bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-amber-500 hover:border-amber-500/50"
+                              : "bg-white border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:text-amber-600 hover:border-amber-600/50"
+                          }`}
+                        >
+                          {profileImage ? "Change Photo" : "Upload Photo"}
+                        </Button>
+
+                        {profileImage && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={removeProfileImage}
+                            className={`text-sm py-1 px-3 transition-all duration-300 ${
+                              theme === "dark"
+                                ? "bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-red-500 hover:border-red-500/50"
+                                : "bg-white border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:text-red-600 hover:border-red-600/50"
+                            }`}
+                          >
+                            <X size={14} className="mr-1" />
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Display name */}
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="displayName"
+                        className={`text-sm font-medium ${theme === "dark" ? "text-zinc-300" : "text-zinc-700"}`}
+                      >
+                        Display Name (optional)
+                      </Label>
+                      <Input
+                        id="displayName"
+                        name="displayName"
+                        type="text"
+                        placeholder={formState.username || "How you'll appear to others"}
+                        value={formState.displayName}
+                        onChange={handleInputChange}
+                        className={`bg-opacity-70 transition-all duration-300 ${
+                          theme === "dark"
+                            ? "bg-zinc-800 border-zinc-700 text-white focus:border-amber-500 hover:border-amber-600/70 hover:shadow-[0_0_15px_rgba(217,119,6,0.15)]"
+                            : "bg-white border-zinc-300 text-zinc-900 focus:border-amber-600 hover:border-amber-500/70 hover:shadow-[0_0_15px_rgba(217,119,6,0.1)]"
+                        }`}
+                      />
+                      <p className={`text-xs ${theme === "dark" ? "text-zinc-400" : "text-zinc-600"}`}>
+                        Leave blank to use your username
+                      </p>
                     </div>
                   </div>
                 </>
@@ -630,7 +1158,7 @@ export default function SignupPage() {
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : currentStep === 1 ? (
+                ) : currentStep < 4 ? (
                   <>
                     Continue
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -643,18 +1171,31 @@ export default function SignupPage() {
                 )}
               </Button>
 
-              {currentStep === 2 && (
+              {currentStep > 1 && (
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setCurrentStep(1)}
-                  className={`w-full mt-2 ${
+                  onClick={() => setCurrentStep(currentStep - 1)}
+                  className={`w-full mt-2 transition-all duration-300 ${
                     theme === "dark"
-                      ? "border-zinc-700 text-zinc-300 hover:bg-zinc-800"
-                      : "border-zinc-300 text-zinc-700 hover:bg-zinc-100"
+                      ? "bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 hover:border-zinc-600"
+                      : "bg-white border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 hover:border-zinc-400"
                   }`}
                 >
                   Back
+                </Button>
+              )}
+
+              {currentStep === 4 && (
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={skipProfileSetup}
+                  className={`w-full mt-1 transition-colors duration-300 ${
+                    theme === "dark" ? "text-zinc-400 hover:text-amber-500" : "text-zinc-600 hover:text-amber-600"
+                  }`}
+                >
+                  Skip this step
                 </Button>
               )}
             </form>
@@ -674,6 +1215,8 @@ export default function SignupPage() {
                 </Link>
               </p>
             </div>
+
+            {/* Greek pattern bottom */}
           </motion.div>
         </div>
       </div>

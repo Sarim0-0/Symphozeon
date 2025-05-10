@@ -1,32 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
-import {
-  Music,
-  PlusCircle,
-  LogOut,
-  Search,
-  Users,
-  Headphones,
-  Settings,
-  Bell,
-  User,
-  ChevronRight,
-  Disc3,
-  Lightbulb,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import ThemeToggle from "@/components/theme-toggle"
+import { motion } from "framer-motion"
+import { PlusCircle, LogOut, Search, Users, ChevronRight, Lightbulb } from 'lucide-react'
+import Navbar from "@/components/dashboard/navbar"
 import Orb from "@/components/Orb"
 
 export default function Dashboard() {
   const router = useRouter()
   const [theme, setTheme] = useState<"dark" | "light">("dark")
   const [userName, setUserName] = useState("Music Lover")
-  const [showTooltip, setShowTooltip] = useState<string | null>(null)
   const [hoveredOrb, setHoveredOrb] = useState<string | null>(null)
 
   useEffect(() => {
@@ -56,7 +40,7 @@ export default function Dashboard() {
       id: "create",
       title: "Create Room",
       description: "Start a new music room",
-      icon: <PlusCircle size={24} />,
+      icon: <PlusCircle size={28} />,
       hue: 30, // Amber
       action: () => router.push("/create-room"),
     },
@@ -64,7 +48,7 @@ export default function Dashboard() {
       id: "join",
       title: "Join Room",
       description: "Enter a room code",
-      icon: <Users size={24} />,
+      icon: <Users size={28} />,
       hue: 270, // Purple
       action: () => router.push("/join-room"),
     },
@@ -72,7 +56,7 @@ export default function Dashboard() {
       id: "discover",
       title: "Discover",
       description: "Browse public rooms",
-      icon: <Search size={24} />,
+      icon: <Search size={28} />,
       hue: 200, // Blue
       action: () => router.push("/discover"),
     },
@@ -80,16 +64,10 @@ export default function Dashboard() {
       id: "exit",
       title: "Exit",
       description: "Sign out",
-      icon: <LogOut size={24} />,
+      icon: <LogOut size={28} />,
       hue: 0, // Red-ish
       action: handleLogout,
     },
-  ]
-
-  const recentRooms = [
-    { id: "room1", name: "Jazz Fusion Jam", participants: 8, active: true },
-    { id: "room2", name: "Classical Appreciation", participants: 12, active: false },
-    { id: "room3", name: "Rock Legends", participants: 5, active: true },
   ]
 
   return (
@@ -118,48 +96,8 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Header */}
-      <header className={`w-full py-4 px-6 flex items-center justify-between ${
-        theme === "dark" ? "bg-zinc-900/50" : "bg-white/50"
-      } backdrop-blur-md border-b ${
-        theme === "dark" ? "border-zinc-800" : "border-zinc-200"
-      }`}>
-        <div className="flex items-center">
-          <Link href="/" className="flex items-center group">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
-              theme === "dark"
-                ? "bg-zinc-800 text-amber-500 border border-amber-600/50"
-                : "bg-white text-amber-600 border border-amber-500 shadow-md shadow-amber-200"
-            }`}>
-              <Music size={20} />
-            </div>
-            <h1 className={`font-serif text-2xl font-bold tracking-wide hidden sm:block ${
-              theme === "dark" ? "text-white" : "text-zinc-900"
-            }`}>
-              Symphozeon
-            </h1>
-          </Link>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <ThemeToggle currentTheme={theme} setTheme={setTheme} />
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className={`hidden sm:flex items-center space-x-2 p-2 pl-3 pr-4 rounded-full cursor-pointer ${
-              theme === "dark"
-                ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                : "bg-white text-zinc-600 hover:bg-zinc-50 shadow-sm"
-            }`}
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-              theme === "dark" ? "bg-amber-600 text-black" : "bg-amber-500 text-white"
-            }`}>
-              <User size={16} />
-            </div>
-            <span className="text-sm font-medium">{userName}</span>
-          </motion.div>
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar theme={theme} setTheme={setTheme} userName={userName} />
 
       <main className="container mx-auto px-4 py-8 w-full max-w-[1800px]">
         {/* Welcome section */}
@@ -179,15 +117,15 @@ export default function Dashboard() {
           </p>
         </motion.div>
 
-        {/* Orb Navigation */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 w-full">
+        {/* Orb Navigation - Made larger */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 w-full">
           {dashboardOrbs.map((orb, index) => (
             <motion.div
               key={orb.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="relative h-64 cursor-pointer w-full"
+              className="relative h-80 cursor-pointer w-full" // Increased height from h-64 to h-80
               onMouseEnter={() => setHoveredOrb(orb.id)}
               onMouseLeave={() => setHoveredOrb(null)}
               onClick={orb.action}
@@ -202,14 +140,14 @@ export default function Dashboard() {
               </div>
               
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 pointer-events-none">
-                <div className={`w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                <div className={`w-16 h-16 mx-auto mb-5 rounded-full flex items-center justify-center ${
                   theme === "dark" ? "bg-black/30 text-white" : "bg-white/30 text-zinc-900"
                 }`}>
                   {orb.icon}
                 </div>
                 
                 <motion.h3
-                  className={`text-xl font-bold mb-2 ${
+                  className={`text-2xl font-bold mb-3 ${
                     theme === "dark" ? "text-white" : "text-zinc-900"
                   }`}
                   animate={{
@@ -220,7 +158,7 @@ export default function Dashboard() {
                 </motion.h3>
                 
                 <motion.p
-                  className={`text-sm ${
+                  className={`text-base ${
                     theme === "dark" ? "text-zinc-300" : "text-zinc-700"
                   }`}
                   animate={{
@@ -231,17 +169,17 @@ export default function Dashboard() {
                 </motion.p>
                 
                 <motion.div
-                  className="mt-4"
+                  className="mt-6"
                   animate={{
                     opacity: hoveredOrb === orb.id ? 1 : 0.7,
                     y: hoveredOrb === orb.id ? 0 : 5,
                   }}
                 >
-                  <div className={`p-2 rounded-full ${
+                  <div className={`p-3 rounded-full ${
                     theme === "dark" ? "bg-black/30" : "bg-white/30"
                   }`}>
                     <ChevronRight
-                      size={18}
+                      size={20}
                       className={theme === "dark" ? "text-white" : "text-zinc-900"}
                     />
                   </div>
@@ -251,96 +189,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Recent rooms section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="mb-8 w-full"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className={`text-2xl font-serif font-bold ${
-              theme === "dark" ? "text-white" : "text-zinc-900"
-            }`}>
-              Recent Rooms
-            </h2>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors border ${
-                theme === "dark"
-                  ? "border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-amber-500"
-                  : "border-zinc-300 text-zinc-700 hover:bg-zinc-100 hover:text-amber-600"
-              }`}
-              onClick={() => router.push("/rooms/history")}
-            >
-              View All
-            </motion.button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-            {recentRooms.map((room, index) => (
-              <motion.div
-                key={room.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-                className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${
-                  theme === "dark"
-                    ? "bg-zinc-900/70 border border-zinc-800 hover:border-amber-600/50"
-                    : "bg-white/70 border border-zinc-200 hover:border-amber-500/50"
-                }`}
-                onClick={() => router.push(`/rooms/${room.id}`)}
-              >
-                <div className="flex items-center mb-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
-                    theme === "dark" ? "bg-zinc-800" : "bg-zinc-100"
-                  }`}>
-                    <Disc3 size={20} className={theme === "dark" ? "text-amber-500" : "text-amber-600"} />
-                  </div>
-                  <div>
-                    <h3 className={`font-medium ${
-                      theme === "dark" ? "text-white" : "text-zinc-900"
-                    }`}>
-                      {room.name}
-                    </h3>
-                    <p className={`text-sm ${
-                      theme === "dark" ? "text-zinc-400" : "text-zinc-600"
-                    }`}>
-                      {room.participants} participants
-                    </p>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    room.active
-                      ? theme === "dark"
-                        ? "bg-green-900/30 text-green-400"
-                        : "bg-green-100 text-green-700"
-                      : theme === "dark"
-                        ? "bg-zinc-800 text-zinc-400"
-                        : "bg-zinc-200 text-zinc-600"
-                  }`}>
-                    {room.active ? "Active" : "Ended"}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className={
-                      theme === "dark" ? "text-amber-500 hover:text-amber-400" : "text-amber-600 hover:text-amber-700"
-                    }
-                  >
-                    <Headphones size={16} className="mr-1" />
-                    Join
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Quick Tips Section */}
+        {/* Quick Tips Section - Pushed down by larger orbs */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

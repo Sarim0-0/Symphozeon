@@ -148,7 +148,7 @@ export default function LoginPage() {
       <div className="container relative z-10 px-4 mx-auto py-8">
         <div className="max-w-md mx-auto">
           {/* Logo and title */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <Link href="/" className="inline-block group">
               <div className="flex items-center justify-center mb-4">
                 <div
@@ -174,13 +174,6 @@ export default function LoginPage() {
             </Link>
 
             {/* Greek-inspired decorative element */}
-            <motion.div
-              className="w-32 h-3 mx-auto mb-6 relative overflow-hidden"
-              initial={{ width: 0 }}
-              animate={{ width: "8rem" }}
-              transition={{ duration: 1, delay: 0.3 }}
-            >
-            </motion.div>
           </div>
 
           {/* Login card */}
