@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, LogIn, Check, Users, Disc3, Music } from 'lucide-react'
+import { ArrowLeft, LogIn, Check, Users, Disc3, Music } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Navbar from "@/components/dashboard/navbar"
+import SidebarDock from "@/components/dashboard/sidebar-dock"
 
 export default function JoinRoomPage() {
   const router = useRouter()
@@ -85,7 +86,6 @@ export default function JoinRoomPage() {
     >
       {/* Background ambient elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-
         {/* Ambient glow */}
         <motion.div
           className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] rounded-full blur-[120px] opacity-20 ${
@@ -129,13 +129,12 @@ export default function JoinRoomPage() {
       </div>
 
       {/* Navbar */}
-      <Navbar 
-        theme={theme} 
-        setTheme={setTheme} 
-        showUserProfile={true}
-      />
+      <Navbar theme={theme} setTheme={setTheme} showUserProfile={true}/>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      {/* Sidebar Dock */}
+      <SidebarDock theme={theme} />
+
+      <main className="container mx-auto px-4 py-8 max-w-4xl md:pl-20 pb-16 md:pb-8">
         {/* Page title */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

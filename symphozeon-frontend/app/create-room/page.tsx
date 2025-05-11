@@ -3,9 +3,23 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, Copy, Check, ChevronDown, Globe, Lock, Disc3, Sparkles, Share2, Users, Search, X } from 'lucide-react'
+import {
+  ArrowLeft,
+  Copy,
+  Check,
+  ChevronDown,
+  Globe,
+  Lock,
+  Disc3,
+  Sparkles,
+  Share2,
+  Users,
+  Search,
+  X,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Navbar from "@/components/dashboard/navbar"
+import SidebarDock from "@/components/dashboard/sidebar-dock"
 
 // Comprehensive list of music genres
 const musicGenres = [
@@ -52,8 +66,8 @@ const musicGenres = [
   { id: "techno", name: "Techno" },
   { id: "trance", name: "Trance" },
   { id: "trap", name: "Trap" },
-  { id: "world", name: "World" }
-].sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
+  { id: "world", name: "World" },
+].sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically
 
 export default function CreateRoom() {
   const router = useRouter()
@@ -73,9 +87,7 @@ export default function CreateRoom() {
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Filtered genres based on search query
-  const filteredGenres = musicGenres.filter(genre => 
-    genre.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredGenres = musicGenres.filter((genre) => genre.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
   // Load theme from localStorage on initial render
   useEffect(() => {
@@ -107,61 +119,58 @@ export default function CreateRoom() {
   // Focus search input when dropdown opens
   useEffect(() => {
     if (isGenreDropdownOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
+      searchInputRef.current.focus()
     }
-  }, [isGenreDropdownOpen]);
+  }, [isGenreDropdownOpen])
 
   const toggleGenreSelection = (genreId: string) => {
-  setSelectedGenres(prev => {
-    const updated = prev.includes(genreId)
-      ? prev.filter(id => id !== genreId)
-      : [...prev, genreId];
-    
-    // Clear the search query when a genre is added or removed
-    setSearchQuery("");
-    return updated;
-  });
-};
+    setSelectedGenres((prev) => {
+      const updated = prev.includes(genreId) ? prev.filter((id) => id !== genreId) : [...prev, genreId]
 
+      // Clear the search query when a genre is added or removed
+      setSearchQuery("")
+      return updated
+    })
+  }
 
   const removeGenre = (genreId: string) => {
-    setSelectedGenres(prev => prev.filter(id => id !== genreId));
-  };
+    setSelectedGenres((prev) => prev.filter((id) => id !== genreId))
+  }
 
   const generateRoomLink = () => {
     if (selectedGenres.length === 0 || !roomName.trim()) {
       // Show validation error
-      return;
+      return
     }
 
-    setIsGenerating(true);
+    setIsGenerating(true)
 
     // Simulate API call
     setTimeout(() => {
-      const randomString = Math.random().toString(36).substring(2, 10);
-      const link = `https://symphozeon.com/room/${randomString}`;
-      setGeneratedLink(link);
-      setIsGenerating(false);
-      setIsLinkGenerated(true);
-      setAnimateSuccess(true);
+      const randomString = Math.random().toString(36).substring(2, 10)
+      const link = `https://symphozeon.com/room/${randomString}`
+      setGeneratedLink(link)
+      setIsGenerating(false)
+      setIsLinkGenerated(true)
+      setAnimateSuccess(true)
 
       setTimeout(() => {
-        setAnimateSuccess(false);
-      }, 2000);
-    }, 1500);
-  };
+        setAnimateSuccess(false)
+      }, 2000)
+    }, 1500)
+  }
 
   const copyToClipboard = () => {
     if (linkInputRef.current) {
-      linkInputRef.current.select();
-      document.execCommand("copy");
-      setCopied(true);
+      linkInputRef.current.select()
+      document.execCommand("copy")
+      setCopied(true)
 
       setTimeout(() => {
-        setCopied(false);
-      }, 2000);
+        setCopied(false)
+      }, 2000)
     }
-  };
+  }
 
   return (
     <div
@@ -173,10 +182,6 @@ export default function CreateRoom() {
     >
       {/* Background ambient elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Top meander pattern */}
-
-        {/* Bottom meander pattern */}
-
         {/* Ambient glow */}
         <motion.div
           className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] rounded-full blur-[120px] opacity-20 ${
@@ -220,13 +225,12 @@ export default function CreateRoom() {
       </div>
 
       {/* Navbar */}
-      <Navbar 
-        theme={theme} 
-        setTheme={setTheme} 
-        showUserProfile={true}
-      />
+      <Navbar theme={theme} setTheme={setTheme} showUserProfile={true} />
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      {/* Sidebar Dock */}
+      <SidebarDock theme={theme} />
+
+      <main className="container mx-auto px-4 py-8 max-w-4xl md:pl-20 pb-16 md:pb-8">
         {/* Page title */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -313,12 +317,12 @@ export default function CreateRoom() {
               >
                 Music Genres
               </label>
-              
+
               {/* Selected genres display */}
               {selectedGenres.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {selectedGenres.map(genreId => {
-                    const genre = musicGenres.find(g => g.id === genreId);
+                  {selectedGenres.map((genreId) => {
+                    const genre = musicGenres.find((g) => g.id === genreId)
                     return (
                       <motion.div
                         key={genreId}
@@ -343,11 +347,11 @@ export default function CreateRoom() {
                           <X size={14} />
                         </button>
                       </motion.div>
-                    );
+                    )
                   })}
                 </div>
               )}
-              
+
               <div className="relative" ref={dropdownRef}>
                 <motion.button
                   whileHover={{ scale: 1.01 }}
@@ -365,9 +369,9 @@ export default function CreateRoom() {
                 >
                   <div className="flex items-center">
                     <span>
-                      {selectedGenres.length === 0 
-                        ? "Select Genres" 
-                        : `${selectedGenres.length} genre${selectedGenres.length > 1 ? 's' : ''} selected`}
+                      {selectedGenres.length === 0
+                        ? "Select Genres"
+                        : `${selectedGenres.length} genre${selectedGenres.length > 1 ? "s" : ""} selected`}
                     </span>
                   </div>
                   <ChevronDown
@@ -409,12 +413,12 @@ export default function CreateRoom() {
                           />
                         </div>
                       </div>
-                      
+
                       {/* Genres list */}
-                      <div 
+                      <div
                         className={`py-1 max-h-60 overflow-y-auto ${
-                          theme === "dark" 
-                            ? "scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-zinc-800 hover:scrollbar-thumb-amber-600" 
+                          theme === "dark"
+                            ? "scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-zinc-800 hover:scrollbar-thumb-amber-600"
                             : "scrollbar-thin scrollbar-thumb-zinc-300 scrollbar-track-zinc-100 hover:scrollbar-thumb-amber-400"
                         }`}
                       >
@@ -441,7 +445,9 @@ export default function CreateRoom() {
                             </motion.button>
                           ))
                         ) : (
-                          <div className={`px-4 py-3 text-center ${theme === "dark" ? "text-zinc-400" : "text-zinc-500"}`}>
+                          <div
+                            className={`px-4 py-3 text-center ${theme === "dark" ? "text-zinc-400" : "text-zinc-500"}`}
+                          >
                             No genres found
                           </div>
                         )}

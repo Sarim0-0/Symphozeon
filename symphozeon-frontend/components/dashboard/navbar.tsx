@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import type React from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Music, User } from 'lucide-react'
+import { Music, User } from "lucide-react"
 import ThemeToggle from "@/components/theme-toggle"
 
 interface NavbarProps {
@@ -14,12 +14,12 @@ interface NavbarProps {
   rightContent?: React.ReactNode
 }
 
-export default function Navbar({ 
-  theme, 
-  setTheme, 
-  userName = "Music Lover", 
+export default function Navbar({
+  theme,
+  setTheme,
+  userName = "Music Lover",
   showUserProfile = true,
-  rightContent
+  rightContent,
 }: NavbarProps) {
   return (
     <header
@@ -50,14 +50,14 @@ export default function Navbar({
 
       <div className="flex items-center space-x-4">
         {rightContent}
-        
+
         <ThemeToggle currentTheme={theme} setTheme={setTheme} />
-        
+
         {showUserProfile && (
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className={`hidden sm:flex items-center space-x-2 p-2 pl-3 pr-4 rounded-full cursor-pointer ${
+            className={`flex items-center space-x-2 p-2 pl-3 pr-4 rounded-full cursor-pointer ${
               theme === "dark"
                 ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
                 : "bg-white text-zinc-600 hover:bg-zinc-50 shadow-sm"
@@ -70,7 +70,7 @@ export default function Navbar({
             >
               <User size={16} />
             </div>
-            <span className="text-sm font-medium">{userName}</span>
+            <span className="text-sm font-medium hidden sm:inline">{userName}</span>
           </motion.div>
         )}
       </div>
