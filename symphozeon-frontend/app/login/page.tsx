@@ -93,7 +93,7 @@ export default function LoginPage() {
       }`}
     >
       {/* Background ambient elements */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 overflow-hidden">
         {/* Top meander pattern */}
         {/* Bottom meander pattern */}
 
